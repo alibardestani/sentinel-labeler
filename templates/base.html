@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Sentinel Labeler{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/app.css" />
+  {% block head %}{% endblock %}
+</head>
+
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header>
+      <div class="brand">Sentinel Labeler</div>
+      <div class="spacer"></div>
+
+      <!-- Brush controls: only visible on /mask via block -->
+      <div class="brush-controls {% block mask_controls_class %}hidden{% endblock %}">
+        <div class="pill">
+          <label for="brushSize">اندازه قلم</label>
+          <input id="brushSize" type="number" min="1" max="256" value="{{ brush_size }}" />
+        </div>
+        <div class="pill">
+          <label for="brushShape">شکل قلم</label>
+          <select id="brushShape">
+            <option value="circle" {% if brush_shape=='circle' %}selected{% endif %}>دایره</option>
+            <option value="square" {% if brush_shape=='square' %}selected{% endif %}>مربع</option>
+          </select>
+        </div>
+        <button class="btn" id="saveMaskBtn">ذخیره ماسک</button>
+      </div>
+    </header>
+
+    <!-- Left Sidebar -->
+    <aside class="left">
+      <div class="section">
+        <div class="muted">روش</div>
+        <div class="toolbar">
+          <a class="btn" href="/polygon">لیبل‌زنی پولیگان</a>
+          <a class="btn" href="/mask">اصلاح ماسک</a>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="muted">Pre-label</div>
+        <div class="toolbar">
+          <button class="btn" onclick="openPrelabel()">انتخاب روش Pre-label</button>
+          <div class="muted">نتیجه به صورت نیمه‌شفاف روی تصویر نشان داده می‌شود.</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main>
+      {% block main %}{% endblock %}
+    </main>
+
+    <!-- Right Sidebar -->
+    <aside class="right">
+      {% block right_panel %}{% endblock %}
+      <div class="section">
+        <div class="muted">شفافیت تصویر Sentinel</div>
+        <input id="overlayOpacity" type="range" min="0" max="100" value="60" />
+        <span id="opacityValue">0.60</span>
+      </div>
+      <div class="section">
+        <div class="muted">مدل</div>
+        <div class="toolbar">
+          <input type="file" id="modelFile" accept=".onnx" />
+          <button class="btn" id="uploadModelBtn">بارگذاری مدل</button>
+          <button class="btn" id="runModelBtn">اجرای مدل</button>
+          <div class="muted" id="modelInfo" style="font-size:12px"></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Prelabel Modal -->
+  <div id="modal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="prelabelTitle">
+    <div class="modal-card">
+      <div class="modal-title" id="prelabelTitle">انتخاب روش Pre-label</div>
+      <div class="toolbar">
+        <select id="prelabelMethod" aria-label="روش پیش‌برچسب‌گذاری">
+          <option value="kmeans_rgb">KMeans روی RGB (۲ کلاس)</option>
+          <option value="otsu_gray">آستانه‌گذاری Otsu (خاکستری)</option>
+          <option value="ndvi_otsu">NDVI (آستانه خودکار با Otsu)</option>
+          <option value="ndvi_thresh">NDVI (آستانه ثابت)</option>
+        </select>
+
+        <div id="ndviThreshWrap" class="pill" style="display:none; gap:8px;">
+          <label for="ndviThreshold">NDVI threshold</label>
+          <input id="ndviThreshold" type="number" step="0.01" value="0.2" />
+        </div>
+
+        <div class="pill">
+          <button class="btn primary" id="prelabelRunBtn" onclick="runPrelabel()">اجرا</button>
+          <button class="btn" id="prelabelCloseBtn" onclick="closePrelabel()">بستن</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress Modal -->
+  <div id="progressModal" class="hidden"
+    style="position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.35); z-index:10000;">
+    <div class="modal-card"
+      style="background:var(--panel-2,#1d2230); border:1px solid var(--line,#2a2f3d); padding:16px; border-radius:12px; width:420px; color:var(--text,#e6e9ef);">
+      <div class="modal-title" id="progressTitle" style="margin-bottom:12px; font-weight:600;">در حال پردازش… (0%)</div>
+      <div class="progress" style="height:10px; background:#222833; border-radius:999px; overflow:hidden;">
+        <div class="bar" style="width:0%; height:100%; background:var(--brand,#4f46e5); transition:width .25s;"></div>
+      </div>
+      <div class="muted" style="margin-top:10px; font-size:12px; color:var(--muted,#9aa3b2);">
+        لطفاً صبر کنید. پردازش بسته به اندازه صحنه ممکن است چند دقیقه طول بکشد.
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+
+</html>
