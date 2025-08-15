@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Polygon Labeling – Sentinel Labeler{% endblock %}
+{% block head %}
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+{% endblock %}
+
+{% block main %}
+  <div id="map" class="map"></div>
+{% endblock %}
+
+{% block right_panel %}
+  <div class="section">
+    <div class="muted">ابزارها</div>
+    <div class="toolbar">
+      <div class="muted">ابزار رسم و ویرایش گره‌ها فعال است (Leaflet.Draw)</div>
+      <button class="btn" id="savePolygonsBtn">ذخیره پولیگان‌ها</button>
+      <a class="btn" href="/api/output/polygons.geojson" target="_blank">دانلود GeoJSON</a>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/polygon.js') }}"></script>
+{% endblock %}
